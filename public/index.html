@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>UNO 3D — Telegram Mini App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,600;0,800;0,900;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <!-- TOP HUD BAR -->
+  <header class="hud-header">
+    <div class="brand-badge">
+      <span class="uno-mini-logo">UNO</span>
+      <span class="room-pill" id="room-badge">#global</span>
+    </div>
+    <div class="hud-controls">
+      <button class="icon-btn" id="sound-toggle" onclick="toggleSound()" title="Sound">🔊</button>
+      <div class="lang-switch">
+        <button id="lang-ru" class="lang-btn active" onclick="setLanguage('ru')">RU</button>
+        <button id="lang-uz" class="lang-btn" onclick="setLanguage('uz')">UZ</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- LOBBY SCREEN -->
+  <section id="lobby-screen" class="screen active">
+    <div class="lobby-card">
+      <div class="hero-logo-3d">
+        <div class="uno-emblem">UNO<span>3D</span></div>
+      </div>
+      <p class="lobby-subtitle" id="txt-subtitle">Реалистичный 3D симулятор для Telegram-групп</p>
+
+      <div class="room-box">
+        <div class="room-input-row">
+          <input type="text" id="room-input" placeholder="Код комнаты / Guruh kodi" />
+          <button class="btn-secondary" onclick="changeRoom()" id="txt-join-btn">Войти</button>
+        </div>
+        <button class="btn-share-tg" onclick="shareToTelegramGroup()" id="txt-share-tg">
+          📢 Пригласить группу Telegram (/startgame)
+        </button>
+      </div>
+
+      <div class="players-lobby-wrap">
+        <div class="players-header">
+          <span id="txt-players-title">Игроки за столом</span>
+          <span id="players-count-badge" class="count-pill">1/6</span>
+        </div>
+        <div id="lobby-players-list" class="lobby-players-grid"></div>
+      </div>
+
+      <div class="bot-controls">
+        <button class="btn-bot" onclick="addBot()" id="txt-add-bot">🤖 + AI Бот</button>
+        <button class="btn-bot-clear" onclick="removeBots()" id="txt-clear-bots">✕ Убрать ботов</button>
+      </div>
+
+      <button class="btn-start-main" onclick="startGame()" id="txt-start-game">
+        🔥 НАЧАТЬ ИГРУ
+      </button>
+    </div>
+  </section>
+
+  <!-- 3D POV GAME TABLE SCREEN -->
+  <section id="game-screen" class="screen">
+    <!-- Status Banner -->
+    <div class="action-toast" id="action-toast">🔥 Игра началась!</div>
+
+    <!-- Opponents Row around the top of the 3D Table -->
+    <div class="opponents-arc" id="opponents-container"></div>
+
+    <!-- 3D Perspective Viewport -->
+    <div class="table-viewport">
+      <div class="casino-table-3d" id="casino-table">
+        <div class="table-wood-rim"></div>
+        <div class="table-felt-surface">
+          <!-- Glowing Direction Orbit Ring -->
+          <div class="direction-ring" id="direction-ring">
+            <svg viewBox="0 0 200 200" class="orbit-svg">
+              <circle cx="100" cy="100" r="82" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="28 16" />
+            </svg>
+          </div>
+
+          <!-- Active Color Neon Aura -->
+          <div class="active-color-halo" id="color-halo"></div>
+
+          <!-- Center Draw Deck & Discard Pile -->
+          <div class="table-center-piles">
+            <!-- 3D Draw Deck Stack -->
+            <div class="deck-3d-stack" id="draw-deck" onclick="onDrawDeckClick()">
+              <div class="deck-thickness-layer layer-3"></div>
+              <div class="deck-thickness-layer layer-2"></div>
+              <div class="deck-thickness-layer layer-1"></div>
+              <div class="uno-card back-card top-deck-card">
+                <div class="card-back-design">
+                  <div class="card-back-oval">
+                    <span>UNO</span>
+                  </div>
+                </div>
+              </div>
+              <div class="deck-counter-badge" id="deck-count">84</div>
+              <div class="draw-hint-badge" id="txt-draw-hint">ВЗЯТЬ</div>
+            </div>
+
+            <!-- 3D Discard Pile -->
+            <div class="discard-3d-zone" id="discard-pile"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating UNO! and CATCH! Action Buttons -->
+    <div class="floating-action-buttons">
+      <button id="catch-uno-btn" class="fab-catch hidden" onclick="onCatchUnoClick()">
+        ⚡ <span id="txt-catch-btn">ПОЙМАТЬ! (+2)</span>
+      </button>
+      <button id="say-uno-btn" class="fab-uno" onclick="onSayUnoClick()">
+        UNO!
+      </button>
+    </div>
+
+    <!-- Player Turn Indicator & Current Color Indicator -->
+    <div class="player-hud-bar">
+      <div class="active-color-chip" id="active-color-chip">
+        <span class="color-dot" id="active-color-dot"></span>
+        <span id="active-color-name">Красный</span>
+      </div>
+      <div class="turn-indicator-pill" id="turn-indicator">Ваш ход!</div>
+    </div>
+
+    <!-- First-Person POV Player Hand -->
+    <div class="pov-hand-wrapper">
+      <div class="pov-hand-fan" id="my-hand"></div>
+    </div>
+  </section>
+
+  <!-- WILD COLOR PICKER MODAL -->
+  <div id="color-modal" class="modal-backdrop hidden">
+    <div class="color-picker-card">
+      <h3 id="txt-choose-color">Выберите цвет / Rangni tanlang</h3>
+      <div class="color-wheel-grid">
+        <button class="color-sector red" onclick="confirmWildColor('red')">
+          <span>♦</span>
+        </button>
+        <button class="color-sector yellow" onclick="confirmWildColor('yellow')">
+          <span>★</span>
+        </button>
+        <button class="color-sector green" onclick="confirmWildColor('green')">
+          <span>♣</span>
+        </button>
+        <button class="color-sector blue" onclick="confirmWildColor('blue')">
+          <span>♠</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WINNER VICTORY MODAL -->
+  <div id="winner-modal" class="modal-backdrop hidden">
+    <div class="winner-card-modal">
+      <div class="trophy-icon">🏆</div>
+      <h2 id="txt-winner-title">ПОБЕДИТЕЛЬ!</h2>
+      <div class="winner-name-banner" id="winner-name-display">Игрок</div>
+      <div class="winner-actions">
+        <button class="btn-start-main" onclick="playAgain()" id="txt-play-again">🔄 Сыграть ещё раз</button>
+        <button class="btn-secondary" onclick="backToLobby()" id="txt-to-lobby">В лобби</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFETTI & SHOUT OVERLAY -->
+  <div id="shout-overlay" class="shout-overlay hidden">UNO!</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
