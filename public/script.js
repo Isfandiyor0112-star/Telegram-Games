@@ -146,7 +146,7 @@ const tgUser = tg?.initDataUnsafe?.user;
 const currentUser = {
   id: tgUser?.id || ('u_' + Math.floor(10000 + Math.random() * 90000)),
   name: tgUser?.first_name || ('Игрок ' + Math.floor(10 + Math.random() * 89)),
-  avatar: '😎'
+  avatar: tgUser?.photo_url ? `<img src="${tgUser.photo_url}" class="tg-avatar">` : '😎'
 };
 
 document.getElementById('room-input').value = roomId;

@@ -21,6 +21,7 @@ app.get('/health', (req, res) => res.status(200).json({ status: 'ok', activeRoom
 // Optional Telegram Bot Polling / Webhook support (if BOT_TOKEN is set in Environment Variables)
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
 const APP_URL = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || 'https://telegram-games-uno.onrender.com';
+const MINI_APP_URL = process.env.MINI_APP_URL || '';
 
 if (BOT_TOKEN) {
   let offset = 0;
@@ -35,7 +36,7 @@ if (BOT_TOKEN) {
           if (msg && msg.text && (msg.text.startsWith('/startgame') || msg.text.startsWith('/uno') || msg.text.startsWith('/start'))) {
             const chatId = msg.chat.id;
             const roomCode = `chat_${Math.abs(chatId)}`;
-            const playUrl = `${APP_URL}?room=${roomCode}`;
+            const playUrl = MINI_APP_URL ? `${MINI_APP_URL}?startapp=${roomCode}` : `${APP_URL}?room=${roomCode}`;
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
