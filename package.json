@@ -1,0 +1,17 @@
+{
+  "name": "telegram-games-uno-3d",
+  "version": "2.0.0",
+  "description": "Ultra-realistic 3D UNO Telegram Mini App Game with Socket.io Multiplayer & Bot Integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
