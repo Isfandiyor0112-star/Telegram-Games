@@ -537,10 +537,37 @@ socket.on('uno_caught', ({ victimName }) => {
   showBigShout(`+2 ${victimName}!`);
 });
 
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderWinnerProfile(winner) {
+  const container = document.getElementById('winner-name-display');
+  const rawAvatar = winner?.avatar || '🏆';
+  const imgMatch = typeof rawAvatar === 'string' ? rawAvatar.match(/src=["']([^"']+)["']/) : null;
+  const photoUrl = imgMatch ? imgMatch[1] : (typeof rawAvatar === 'string' && rawAvatar.startsWith('http') ? rawAvatar : null);
+
+  const avatarHtml = photoUrl
+    ? `<div class="winner-avatar-ring"><img src="${escapeHtml(photoUrl)}" alt="Winner" class="winner-avatar-img" onerror="this.parentElement.innerHTML='<span class=\'winner-avatar-emoji\'>🏆</span>'"></div>`
+    : `<div class="winner-avatar-ring"><span class="winner-avatar-emoji">${escapeHtml(rawAvatar)}</span></div>`;
+
+  container.innerHTML = `
+    <div class="winner-profile">
+      ${avatarHtml}
+      <div class="winner-profile-name">${escapeHtml(winner?.name || 'Игрок')}</div>
+    </div>
+  `;
+}
+
 socket.on('game_over', ({ winner }) => {
   sfxWin();
   haptic('heavy');
-  document.getElementById('winner-name-display').innerText = `${winner.avatar || '🏆'} ${winner.name}`;
+  renderWinnerProfile(winner);
   document.getElementById('winner-modal').classList.remove('hidden');
 });
 
