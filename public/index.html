@@ -38,6 +38,7 @@
       <div class="room-box">
         <div class="room-input-row">
           <input type="text" id="room-input" placeholder="Код комнаты / Guruh kodi" />
+          <button class="btn-secondary" onclick="newRandomRoom()" title="Новая случайная комната">🎲</button>
           <button class="btn-secondary" onclick="changeRoom()" id="txt-join-btn">Войти</button>
         </div>
         <button class="btn-share-tg" onclick="shareToTelegramGroup()" id="txt-share-tg">
@@ -112,12 +113,9 @@
       </div>
     </div>
 
-    <!-- Floating UNO! and CATCH! Action Buttons -->
+    <!-- Floating UNO! Action Button -->
     <div class="floating-action-buttons">
-      <button id="catch-uno-btn" class="fab-catch hidden" onclick="onCatchUnoClick()">
-        ⚡ <span id="txt-catch-btn">ПОЙМАТЬ! (+2)</span>
-      </button>
-      <button id="say-uno-btn" class="fab-uno" onclick="onSayUnoClick()">
+      <button id="say-uno-btn" class="fab-uno" onclick="onSayUnoClick()" disabled>
         UNO!
       </button>
     </div>

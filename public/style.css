@@ -957,3 +957,242 @@ body {
   margin-right: 4px;
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
+
+
+/* ==========================================
+   TABLET & MULTI-SCREEN RESPONSIVE OPTIMIZATION
+========================================== */
+body, .screen {
+  height: 100dvh;
+}
+
+#game-screen {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+#game-screen.active {
+  display: flex;
+}
+
+.opponents-arc {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  padding: 34px 12px 4px;
+  max-width: 960px;
+}
+
+.opponent-seat {
+  cursor: pointer;
+}
+
+.opponent-seat:active {
+  transform: scale(0.93);
+}
+
+.table-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  width: 100%;
+  perspective: 1100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.casino-table-3d {
+  width: min(92vw, 640px);
+  height: clamp(230px, 42dvh, 420px);
+  transform: rotateX(44deg) translateY(-4px);
+}
+
+.direction-ring {
+  width: clamp(190px, 34vmin, 300px);
+  height: clamp(190px, 34vmin, 300px);
+}
+
+.active-color-halo {
+  width: clamp(150px, 28vmin, 240px);
+  height: clamp(150px, 28vmin, 240px);
+}
+
+.player-hud-bar {
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.pov-hand-wrapper {
+  flex-shrink: 0;
+  height: clamp(138px, 22dvh, 185px);
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.fab-uno {
+  transition: transform 0.2s, opacity 0.25s, background 0.25s;
+}
+
+.fab-uno:disabled {
+  opacity: 0.35;
+  cursor: default;
+  box-shadow: none;
+  filter: grayscale(0.5);
+}
+
+.fab-uno.uno-confirmed {
+  opacity: 0.95;
+  filter: none;
+  background: radial-gradient(circle, var(--uno-green) 0%, #157347 100%);
+  border-color: #fff;
+  color: #fff;
+  font-size: 14px;
+}
+
+/* Tablets & Large Screens (iPad, Galaxy Tab, Desktop) */
+@media (min-width: 768px) {
+  .hud-header {
+    height: 60px;
+    padding: 0 24px;
+  }
+
+  .screen {
+    padding-top: 60px;
+  }
+
+  .lobby-card {
+    max-width: 500px;
+    padding: 28px 26px;
+  }
+
+  .opponents-arc {
+    gap: 18px;
+    padding-top: 42px;
+  }
+
+  .opponent-seat {
+    min-width: 120px;
+    padding: 8px 16px;
+  }
+
+  .opp-name {
+    font-size: 14px;
+    max-width: 120px;
+  }
+
+  .casino-table-3d {
+    width: min(82vw, 760px);
+    height: clamp(300px, 46dvh, 460px);
+    transform: rotateX(40deg) translateY(0);
+  }
+
+  .table-center-piles {
+    gap: 54px;
+  }
+
+  .uno-card,
+  .deck-3d-stack,
+  .discard-3d-zone {
+    width: 108px;
+    height: 158px;
+  }
+
+  .card-center-oval {
+    width: 88px;
+    height: 126px;
+  }
+
+  .card-main-symbol {
+    font-size: 48px;
+  }
+
+  .card-back-oval {
+    width: 84px;
+    height: 120px;
+  }
+
+  .pov-hand-wrapper {
+    height: 200px;
+  }
+
+  .pov-hand-fan .uno-card {
+    margin-left: -26px;
+  }
+
+  .floating-action-buttons {
+    right: 28px;
+    bottom: 215px;
+  }
+
+  .fab-uno {
+    width: 78px;
+    height: 78px;
+    font-size: 20px;
+  }
+}
+
+/* Landscape Tablets & Short Screens */
+@media (max-height: 660px) {
+  .opponents-arc {
+    padding-top: 28px;
+    gap: 8px;
+  }
+
+  .casino-table-3d {
+    width: min(76vw, 560px);
+    height: clamp(190px, 38dvh, 290px);
+    transform: rotateX(46deg) translateY(-6px);
+  }
+
+  .table-center-piles {
+    gap: 28px;
+  }
+
+  .uno-card,
+  .deck-3d-stack,
+  .discard-3d-zone {
+    width: 78px;
+    height: 114px;
+  }
+
+  .card-center-oval {
+    width: 62px;
+    height: 90px;
+  }
+
+  .card-main-symbol {
+    font-size: 34px;
+  }
+
+  .card-back-oval {
+    width: 60px;
+    height: 86px;
+  }
+
+  .card-back-oval span {
+    font-size: 18px;
+  }
+
+  .pov-hand-wrapper {
+    height: 132px;
+  }
+
+  .pov-hand-fan .uno-card {
+    margin-left: -24px;
+  }
+
+  .floating-action-buttons {
+    right: 16px;
+    bottom: 145px;
+  }
+
+  .fab-uno {
+    width: 58px;
+    height: 58px;
+    font-size: 15px;
+  }
+}

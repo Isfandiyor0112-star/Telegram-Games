@@ -35,14 +35,14 @@ if (BOT_TOKEN) {
           const msg = update.message;
           if (msg && msg.text && (msg.text.startsWith('/startgame') || msg.text.startsWith('/uno') || msg.text.startsWith('/start'))) {
             const chatId = msg.chat.id;
-            const roomCode = `chat_${Math.abs(chatId)}`;
+            const roomCode = `uno_${Math.random().toString(36).substring(2, 7)}`;
             const playUrl = MINI_APP_URL ? `${MINI_APP_URL}?startapp=${roomCode}` : `${APP_URL}?room=${roomCode}`;
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 chat_id: chatId,
-                text: `🎴 *3D UNO — Стол открыт!*\nЗаходите в комнату чата и начинайте игру! / O'yinga qo'shiling!`,
+                text: `🎴 *3D UNO — Новый стол #${roomCode}!*\nЗаходите и начинайте игру! / Yangi stolga qo'shiling!`,
                 parse_mode: 'Markdown',
                 reply_markup: {
                   inline_keyboard: [[
@@ -177,6 +177,7 @@ function broadcastRoomState(roomId) {
         players: publicPlayers,
         myHand: p.hand,
         myId: p.id,
+        mySaidUno: p.saidUno,
         topCard,
         currentColor: room.currentColor,
         currentValue: room.currentValue,
@@ -236,6 +237,7 @@ function executeBotTurn(roomId) {
 
     playCardInternal(room, bot, cardToPlay.id, chosenColor);
   } else {
+    room.players.forEach(p => { p.unoVulnerable = false; });
     const drawn = drawFromDeck(room, 1)[0];
     bot.hand.push(drawn);
     bot.saidUno = false;
@@ -261,9 +263,18 @@ function playCardInternal(room, player, cardId, chosenColor) {
   const card = player.hand[cardIndex];
   if (!canPlayCard(card, room)) return false;
 
+  // Close catch window for everyone as soon as the next move is played
+  room.players.forEach(p => { p.unoVulnerable = false; });
+
   player.hand.splice(cardIndex, 1);
-  if (player.hand.length !== 1) {
+  if (player.hand.length === 1) {
+    if (!player.saidUno) {
+      player.unoVulnerable = true;
+      player.unoGraceUntil = Date.now() + 2500; // 2.5s fair grace period
+    }
+  } else {
     player.saidUno = false;
+    player.unoVulnerable = false;
   }
 
   const playedCard = {
@@ -452,6 +463,8 @@ io.on('connection', (socket) => {
     room.players.forEach(p => {
       p.hand = drawFromDeck(room, 7);
       p.saidUno = false;
+      p.unoVulnerable = false;
+      p.unoGraceUntil = 0;
     });
 
     // Pick initial non-wild card
@@ -493,9 +506,13 @@ io.on('connection', (socket) => {
     const currentPlayer = room.players[room.turnIndex];
     if (!currentPlayer || String(currentPlayer.id) !== String(currentUserId)) return;
 
+    // Close catch window for everyone when next player draws
+    room.players.forEach(p => { p.unoVulnerable = false; });
+
     const drawn = drawFromDeck(room, 1)[0];
     currentPlayer.hand.push(drawn);
     currentPlayer.saidUno = false;
+    currentPlayer.unoVulnerable = false;
     room.lastActionText = `📥 ${currentPlayer.name} взял(а) карту`;
 
     // If drawn card cannot be played immediately, pass turn
@@ -515,15 +532,16 @@ io.on('connection', (socket) => {
     const player = room.players.find(p => String(p.id) === String(currentUserId));
     if (!player) return;
 
-    if (player.hand.length <= 2) {
+    if (player.hand.length <= 2 && player.hand.length > 0 && !player.saidUno) {
       player.saidUno = true;
+      player.unoVulnerable = false;
       room.lastActionText = `🚨 ${player.name} крикнул(а) УНО!`;
       io.to(currentRoomId).emit('uno_shout', { playerId: player.id, playerName: player.name });
       broadcastRoomState(currentRoomId);
     }
   });
 
-  socket.on('catch_uno', () => {
+  socket.on('catch_uno', (payload = {}) => {
     if (!currentRoomId) return;
     const room = rooms[currentRoomId];
     if (!room || !room.started) return;
@@ -531,11 +549,23 @@ io.on('connection', (socket) => {
     const catcher = room.players.find(p => String(p.id) === String(currentUserId));
     if (!catcher) return;
 
+    const targetId = payload && payload.targetPlayerId ? String(payload.targetPlayerId) : null;
+    const now = Date.now();
     let caughtSomeone = false;
+
     room.players.forEach(p => {
-      if (p.id !== catcher.id && p.hand.length === 1 && !p.saidUno) {
+      const matchesTarget = targetId ? String(p.id) === targetId : true;
+      if (
+        matchesTarget &&
+        p.id !== catcher.id &&
+        p.hand.length === 1 &&
+        !p.saidUno &&
+        p.unoVulnerable &&
+        now >= (p.unoGraceUntil || 0)
+      ) {
         p.hand.push(...drawFromDeck(room, 2));
         p.saidUno = false;
+        p.unoVulnerable = false;
         caughtSomeone = true;
         room.lastActionText = `⚡ ${catcher.name} поймал(а) ${p.name} без УНО! (+2 карты)`;
         io.to(currentRoomId).emit('uno_caught', { catcherName: catcher.name, victimName: p.name });

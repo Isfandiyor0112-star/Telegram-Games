@@ -127,7 +127,6 @@ function setLanguage(lang) {
   document.getElementById('txt-clear-bots').innerText = t.clearBots;
   document.getElementById('txt-start-game').innerText = t.startGame;
   document.getElementById('txt-draw-hint').innerText = t.drawHint;
-  document.getElementById('txt-catch-btn').innerText = t.catchBtn;
   document.getElementById('txt-choose-color').innerText = t.chooseColor;
   document.getElementById('txt-winner-title').innerText = t.winnerTitle;
   document.getElementById('txt-play-again').innerText = t.playAgain;
@@ -140,7 +139,7 @@ function setLanguage(lang) {
 // USER & ROOM INITIALIZATION
 // ==========================================
 const urlParams = new URLSearchParams(window.location.search);
-let roomId = urlParams.get('room') || tg?.initDataUnsafe?.start_param || 'angren_uno_1';
+let roomId = urlParams.get('room') || tg?.initDataUnsafe?.start_param || ('uno_' + Math.random().toString(36).substring(2, 7));
 
 const tgUser = tg?.initDataUnsafe?.user;
 const currentUser = {
@@ -165,6 +164,13 @@ function changeRoom() {
   const val = document.getElementById('room-input').value.trim();
   if (!val) return;
   roomId = val;
+  joinCurrentRoom();
+}
+
+function newRandomRoom() {
+  haptic('light');
+  roomId = 'uno_' + Math.random().toString(36).substring(2, 7);
+  document.getElementById('room-input').value = roomId;
   joinCurrentRoom();
 }
 
@@ -307,19 +313,16 @@ function renderGameState(state) {
     turnEl.classList.remove('my-turn');
   }
 
-  // Render Opponents
+  // Render Opponents (Click avatar to stealth-catch if they forgot UNO!)
   const oppContainer = document.getElementById('opponents-container');
   oppContainer.innerHTML = '';
-  let catchableOpponentExists = false;
 
   state.players.forEach(p => {
     if (String(p.id) === String(currentUser.id)) return;
-    if (p.cardCount === 1 && !p.saidUno) {
-      catchableOpponentExists = true;
-    }
 
     const seat = document.createElement('div');
     seat.className = `opponent-seat ${p.isTurn ? 'active-turn' : ''}`;
+    seat.title = currentLang === 'uz' ? "UNO aytmagan bo'lsa bosing" : "Нажмите, если забыл сказать UNO";
     seat.innerHTML = `
       ${p.saidUno ? '<div class="opp-uno-badge">UNO!</div>' : ''}
       <div class="opp-name">${p.avatar} ${p.name}</div>
@@ -328,16 +331,18 @@ function renderGameState(state) {
         <span class="opp-count-num">×${p.cardCount}</span>
       </div>
     `;
+    seat.onclick = () => onOpponentAvatarClick(p);
     oppContainer.appendChild(seat);
   });
 
-  // Show/hide Catch UNO button
-  document.getElementById('catch-uno-btn').classList.toggle('hidden', !catchableOpponentExists);
-
-  // Pulse UNO button if player has 1 or 2 cards
+  // UNO button: one-time activation when 1-2 cards, locked once pressed or when >2 cards
   const myHand = state.myHand || [];
   const unoBtn = document.getElementById('say-uno-btn');
-  unoBtn.classList.toggle('pulse-alert', myHand.length <= 2 && myHand.length > 0);
+  const canPressUno = myHand.length <= 2 && myHand.length > 0 && !state.mySaidUno;
+  unoBtn.disabled = !canPressUno;
+  unoBtn.classList.toggle('pulse-alert', canPressUno);
+  unoBtn.classList.toggle('uno-confirmed', Boolean(state.mySaidUno));
+  unoBtn.innerText = state.mySaidUno ? '✓ UNO' : 'UNO!';
 
   // Render Top Discard Card
   const discardZone = document.getElementById('discard-pile');
@@ -412,15 +417,17 @@ function onDrawDeckClick() {
 }
 
 function onSayUnoClick() {
+  const unoBtn = document.getElementById('say-uno-btn');
+  if (unoBtn.disabled) return;
+  unoBtn.disabled = true;
   haptic('heavy');
   sfxUnoShout();
   socket.emit('say_uno');
 }
 
-function onCatchUnoClick() {
-  haptic('heavy');
-  sfxUnoShout();
-  socket.emit('catch_uno');
+function onOpponentAvatarClick(player) {
+  haptic('light');
+  socket.emit('catch_uno', { targetPlayerId: player.id });
 }
 
 function showBigShout(text) {
