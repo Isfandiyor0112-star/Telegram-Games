@@ -2,6 +2,32 @@ const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
   tg.expand();
+  try {
+    if (typeof tg.disableVerticalSwipes === 'function') {
+      tg.disableVerticalSwipes();
+    }
+    if (typeof tg.requestFullscreen === 'function') {
+      tg.requestFullscreen();
+    }
+  } catch (e) {}
+}
+
+function toggleFullscreen() {
+  try {
+    if (tg && typeof tg.requestFullscreen === 'function') {
+      if (tg.isFullscreen && typeof tg.exitFullscreen === 'function') {
+        tg.exitFullscreen();
+      } else {
+        tg.requestFullscreen();
+      }
+      return;
+    }
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  } catch (e) {}
 }
 
 // ==========================================

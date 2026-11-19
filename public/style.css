@@ -1305,3 +1305,103 @@ body, .screen {
     height: clamp(180px, 21dvh, 220px);
   }
 }
+
+
+/* ==========================================
+   TELEGRAM TABLET MODAL & FULLSCREEN FIXES
+========================================== */
+:root {
+  --tg-top-inset: calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px));
+}
+
+.hud-header {
+  top: var(--tg-top-inset);
+}
+
+.screen {
+  padding-top: calc(54px + var(--tg-top-inset));
+}
+
+.action-toast {
+  top: calc(62px + var(--tg-top-inset));
+}
+
+/* Fix for Telegram centered popup modal on Tablets & Desktop (narrow width ~380-480px, short height ~560-720px) */
+@media (max-width: 520px) and (max-height: 760px) {
+  .opponents-arc {
+    padding: 26px 8px 2px;
+    gap: 6px;
+  }
+
+  .opponent-seat {
+    min-width: 76px;
+    padding: 4px 8px;
+    border-radius: 12px;
+  }
+
+  .opp-name {
+    font-size: 11px;
+    max-width: 74px;
+  }
+
+  .casino-table-3d {
+    width: 90vw;
+    height: clamp(185px, 34dvh, 270px);
+    transform: rotateX(42deg) translateY(-4px);
+    box-shadow: 0 22px 0 #261207, 0 36px 45px rgba(0, 0, 0, 0.9);
+  }
+
+  .table-center-piles {
+    gap: 24px;
+  }
+
+  .uno-card,
+  .deck-3d-stack,
+  .discard-3d-zone {
+    width: 76px;
+    height: 112px;
+    border-radius: 11px;
+  }
+
+  .card-center-oval {
+    width: 60px;
+    height: 88px;
+  }
+
+  .card-main-symbol {
+    font-size: 32px;
+  }
+
+  .card-corner {
+    font-size: 12px;
+  }
+
+  .card-back-oval {
+    width: 58px;
+    height: 84px;
+  }
+
+  .card-back-oval span {
+    font-size: 18px;
+  }
+
+  .pov-hand-wrapper {
+    height: 132px;
+    padding-bottom: 8px;
+  }
+
+  .pov-hand-fan .uno-card {
+    margin-left: -26px;
+  }
+
+  .floating-action-buttons {
+    right: 12px;
+    bottom: 148px;
+  }
+
+  .fab-uno {
+    width: 56px;
+    height: 56px;
+    font-size: 14px;
+  }
+}
