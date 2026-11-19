@@ -29,6 +29,19 @@ window.addEventListener('resize', syncViewportLayout);
 window.addEventListener('orientationchange', () => setTimeout(syncViewportLayout, 150));
 syncViewportLayout();
 
+function updateViewportLayout() {
+  const h = (tg && (tg.viewportStableHeight || tg.viewportHeight)) || window.innerHeight;
+  document.documentElement.style.setProperty('--app-h', `${h}px`);
+  document.body.classList.toggle('compact-window', h < 700);
+  document.body.classList.toggle('ultra-compact', h < 570);
+}
+
+window.addEventListener('resize', updateViewportLayout);
+if (tg && typeof tg.onEvent === 'function') {
+  tg.onEvent('viewportChanged', updateViewportLayout);
+}
+updateViewportLayout();
+
 function toggleFullscreen() {
   try {
     if (tg && typeof tg.requestFullscreen === 'function') {

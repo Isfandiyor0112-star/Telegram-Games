@@ -1559,3 +1559,159 @@ body.ultra-compact-modal .pov-hand-wrapper {
 body.ultra-compact-modal .floating-action-buttons {
   bottom: 112px;
 }
+
+/* ==========================================
+   DYNAMIC VIEWPORT COMPACT MODES (ALL TABLET/PC MODAL SIZES)
+========================================== */
+body, .screen, #game-screen {
+  height: var(--app-h, 100dvh);
+}
+
+body.compact-window .hud-header {
+  height: 46px;
+}
+
+body.compact-window .screen {
+  padding-top: calc(46px + var(--tg-top-inset, 0px));
+}
+
+body.compact-window .action-toast {
+  top: calc(50px + var(--tg-top-inset, 0px));
+  font-size: 11px;
+  padding: 4px 12px;
+}
+
+body.compact-window .opponents-arc {
+  padding: 24px 8px 2px;
+  gap: 8px;
+}
+
+body.compact-window .opponent-seat {
+  min-width: 76px;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+body.compact-window .opp-name {
+  font-size: 11px;
+}
+
+body.compact-window .casino-table-3d {
+  width: min(88vw, 480px);
+  height: clamp(170px, 35dvh, 255px);
+  transform: rotateX(41deg) translateY(-2px);
+  box-shadow: 0 20px 0 #261207, 0 34px 44px rgba(0, 0, 0, 0.9);
+}
+
+body.compact-window .table-center-piles {
+  gap: 26px;
+}
+
+body.compact-window .uno-card,
+body.compact-window .deck-3d-stack,
+body.compact-window .discard-3d-zone {
+  width: 74px;
+  height: 110px;
+  border-radius: 11px;
+  padding: 4px;
+}
+
+body.compact-window .card-center-oval {
+  width: 58px;
+  height: 84px;
+}
+
+body.compact-window .card-main-symbol {
+  font-size: 31px;
+}
+
+body.compact-window .card-corner {
+  font-size: 11px;
+}
+
+body.compact-window .card-back-oval {
+  width: 56px;
+  height: 80px;
+}
+
+body.compact-window .card-back-oval span {
+  font-size: 17px;
+}
+
+body.compact-window .active-color-chip,
+body.compact-window .turn-indicator-pill {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+body.compact-window .pov-hand-wrapper {
+  height: 124px;
+  padding-bottom: 6px;
+}
+
+body.compact-window .pov-hand-fan {
+  padding: 10px 18px 4px;
+}
+
+body.compact-window .pov-hand-fan .uno-card {
+  margin-left: -24px;
+}
+
+body.compact-window .floating-action-buttons {
+  right: 12px;
+  bottom: 136px;
+}
+
+body.compact-window .fab-uno {
+  width: 54px;
+  height: 54px;
+  font-size: 13px;
+}
+
+body.ultra-compact .lobby-card {
+  padding: 14px;
+  gap: 8px;
+  max-height: calc(var(--app-h, 100dvh) - 56px);
+  overflow-y: auto;
+}
+
+body.ultra-compact .uno-emblem {
+  font-size: 30px;
+  padding: 4px 18px;
+}
+
+body.ultra-compact .casino-table-3d {
+  width: min(86vw, 390px);
+  height: clamp(145px, 33dvh, 205px);
+  transform: rotateX(37deg) translateY(0);
+}
+
+body.ultra-compact .uno-card,
+body.ultra-compact .deck-3d-stack,
+body.ultra-compact .discard-3d-zone {
+  width: 64px;
+  height: 94px;
+}
+
+body.ultra-compact .card-center-oval {
+  width: 50px;
+  height: 70px;
+}
+
+body.ultra-compact .card-main-symbol {
+  font-size: 26px;
+}
+
+body.ultra-compact .pov-hand-wrapper {
+  height: 108px;
+}
+
+body.ultra-compact .floating-action-buttons {
+  bottom: 116px;
+}
+
+body.ultra-compact .fab-uno {
+  width: 48px;
+  height: 48px;
+  font-size: 12px;
+}

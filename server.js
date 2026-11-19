@@ -279,9 +279,11 @@ function playCardInternal(room, player, cardId, chosenColor) {
     player.unoVulnerable = false;
   }
 
+  let rawAngle = Math.floor(Math.random() * 56) - 28;
+  if (Math.abs(rawAngle) < 6) rawAngle = rawAngle < 0 ? -9 : 9;
   const playedCard = {
     ...card,
-    angle: Math.floor(Math.random() * 56) - 28,
+    angle: rawAngle,
     offsetX: Math.floor(Math.random() * 24) - 12,
     offsetY: Math.floor(Math.random() * 20) - 10
   };
@@ -485,7 +487,7 @@ io.on('connection', (socket) => {
       firstCard = drawFromDeck(room, 1)[0];
     }
 
-    firstCard.angle = Math.floor(Math.random() * 24) - 12;
+    firstCard.angle = (Math.random() < 0.5 ? -1 : 1) * (7 + Math.floor(Math.random() * 11));
     firstCard.offsetX = Math.floor(Math.random() * 10) - 5;
     firstCard.offsetY = Math.floor(Math.random() * 10) - 5;
     room.discardPile.push(firstCard);
