@@ -548,18 +548,23 @@ function escapeHtml(str) {
 
 function renderWinnerProfile(winner) {
   const container = document.getElementById('winner-name-display');
+  const displayName = winner?.name || 'Игрок';
+  const safeName = escapeHtml(displayName);
+  const initial = escapeHtml(displayName.trim().charAt(0).toUpperCase() || '🏆');
   const rawAvatar = winner?.avatar || '🏆';
-  const imgMatch = typeof rawAvatar === 'string' ? rawAvatar.match(/src=["']([^"']+)["']/) : null;
-  const photoUrl = imgMatch ? imgMatch[1] : (typeof rawAvatar === 'string' && rawAvatar.startsWith('http') ? rawAvatar : null);
+  const imgMatch = typeof rawAvatar === 'string' ? rawAvatar.match(/src=["']([^"']+)["']/i) : null;
+  const photoUrl = imgMatch
+    ? imgMatch[1]
+    : (typeof rawAvatar === 'string' && /^https?:\/\//i.test(rawAvatar.trim()) ? rawAvatar.trim() : null);
 
   const avatarHtml = photoUrl
-    ? `<div class="winner-avatar-ring"><img src="${escapeHtml(photoUrl)}" alt="Winner" class="winner-avatar-img" onerror="this.parentElement.innerHTML='<span class=\'winner-avatar-emoji\'>🏆</span>'"></div>`
+    ? `<div class="winner-avatar-ring"><img src="${escapeHtml(photoUrl)}" alt="${safeName}" class="winner-avatar-img" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='<span class=\'winner-avatar-initial\'>${initial}</span>'"></div>`
     : `<div class="winner-avatar-ring"><span class="winner-avatar-emoji">${escapeHtml(rawAvatar)}</span></div>`;
 
   container.innerHTML = `
     <div class="winner-profile">
       ${avatarHtml}
-      <div class="winner-profile-name">${escapeHtml(winner?.name || 'Игрок')}</div>
+      <div class="winner-profile-name">${safeName}</div>
     </div>
   `;
 }
