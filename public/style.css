@@ -705,15 +705,25 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  animation: throwCardToTable 0.32s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.52);
+}
+
+.discard-under-card {
+  filter: brightness(0.9);
+  pointer-events: none;
+}
+
+.discard-card-item.card-just-thrown {
+  animation: throwCardToTable 0.34s cubic-bezier(0.16, 0.88, 0.3, 1.18) forwards;
 }
 
 @keyframes throwCardToTable {
   0% {
-    transform: translateY(180px) scale(1.35) rotate(0deg);
-    opacity: 0.4;
+    transform: translate(0px, 160px) scale(1.32) rotate(-14deg);
+    opacity: 0.35;
   }
   100% {
+    transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(1) rotate(var(--rot, 0deg));
     opacity: 1;
   }
 }
@@ -1404,4 +1414,148 @@ body, .screen {
     height: 56px;
     font-size: 14px;
   }
+}
+
+/* ==========================================
+   LIVE VIEWPORT HEIGHT & COMPACT MODAL SCALING
+========================================== */
+body, .screen, #game-screen {
+  height: var(--app-h, 100dvh);
+}
+
+.lobby-card {
+  max-height: calc(var(--app-h, 100dvh) - 68px - var(--tg-top-inset, 0px));
+  overflow-y: auto;
+}
+
+body.compact-modal .hud-header {
+  height: 44px;
+  padding: 0 10px;
+}
+
+body.compact-modal .screen {
+  padding-top: calc(44px + var(--tg-top-inset, 0px));
+}
+
+body.compact-modal .action-toast {
+  top: calc(48px + var(--tg-top-inset, 0px));
+  font-size: 11px;
+  padding: 4px 12px;
+}
+
+body.compact-modal .opponents-arc {
+  padding: 24px 8px 2px;
+  gap: 6px;
+}
+
+body.compact-modal .casino-table-3d {
+  width: min(88vw, 480px);
+  height: clamp(160px, 34vh, 240px);
+  transform: rotateX(40deg) translateY(-2px);
+  box-shadow: 0 18px 0 #261207, 0 30px 42px rgba(0, 0, 0, 0.9);
+}
+
+body.compact-modal .table-wood-rim {
+  inset: -10px;
+}
+
+body.compact-modal .direction-ring {
+  width: 168px;
+  height: 168px;
+}
+
+body.compact-modal .active-color-halo {
+  width: 136px;
+  height: 136px;
+}
+
+body.compact-modal .table-center-piles {
+  gap: 22px;
+}
+
+body.compact-modal .uno-card,
+body.compact-modal .deck-3d-stack,
+body.compact-modal .discard-3d-zone {
+  width: 70px;
+  height: 102px;
+  border-radius: 10px;
+}
+
+body.compact-modal .uno-card {
+  padding: 4px;
+}
+
+body.compact-modal .card-center-oval {
+  width: 56px;
+  height: 80px;
+}
+
+body.compact-modal .card-main-symbol {
+  font-size: 30px;
+}
+
+body.compact-modal .color-wild .card-main-symbol {
+  font-size: 22px;
+}
+
+body.compact-modal .card-corner {
+  font-size: 11px;
+}
+
+body.compact-modal .card-back-oval {
+  width: 52px;
+  height: 76px;
+}
+
+body.compact-modal .card-back-oval span {
+  font-size: 16px;
+}
+
+body.compact-modal .pov-hand-wrapper {
+  height: 122px;
+  padding-bottom: 6px;
+}
+
+body.compact-modal .pov-hand-fan .uno-card {
+  margin-left: -24px;
+}
+
+body.compact-modal .floating-action-buttons {
+  right: 10px;
+  bottom: 132px;
+}
+
+body.compact-modal .fab-uno {
+  width: 52px;
+  height: 52px;
+  font-size: 13px;
+}
+
+body.ultra-compact-modal .casino-table-3d {
+  height: 142px;
+  transform: rotateX(36deg);
+}
+
+body.ultra-compact-modal .uno-card,
+body.ultra-compact-modal .deck-3d-stack,
+body.ultra-compact-modal .discard-3d-zone {
+  width: 62px;
+  height: 90px;
+}
+
+body.ultra-compact-modal .card-center-oval {
+  width: 48px;
+  height: 70px;
+}
+
+body.ultra-compact-modal .card-main-symbol {
+  font-size: 25px;
+}
+
+body.ultra-compact-modal .pov-hand-wrapper {
+  height: 106px;
+}
+
+body.ultra-compact-modal .floating-action-buttons {
+  bottom: 112px;
 }

@@ -12,6 +12,23 @@ if (tg) {
   } catch (e) {}
 }
 
+
+function syncViewportLayout() {
+  const vh = (tg && tg.viewportHeight && tg.viewportHeight > 220)
+    ? tg.viewportHeight
+    : window.innerHeight;
+  document.documentElement.style.setProperty('--app-h', `${vh}px`);
+  document.body.classList.toggle('compact-modal', vh < 660);
+  document.body.classList.toggle('ultra-compact-modal', vh < 540);
+}
+if (tg && typeof tg.onEvent === 'function') {
+  tg.onEvent('viewportChanged', syncViewportLayout);
+  tg.onEvent('fullscreenChanged', syncViewportLayout);
+}
+window.addEventListener('resize', syncViewportLayout);
+window.addEventListener('orientationchange', () => setTimeout(syncViewportLayout, 150));
+syncViewportLayout();
+
 function toggleFullscreen() {
   try {
     if (tg && typeof tg.requestFullscreen === 'function') {
@@ -180,6 +197,7 @@ document.getElementById('room-badge').innerText = `#${roomId}`;
 const socket = io();
 let latestState = null;
 let pendingWildCardId = null;
+let lastRenderedTopCardId = null;
 
 function joinCurrentRoom() {
   document.getElementById('room-badge').innerText = `#${roomId}`;
@@ -372,18 +390,38 @@ function renderGameState(state) {
   unoBtn.classList.toggle('uno-confirmed', Boolean(state.mySaidUno));
   unoBtn.innerText = state.mySaidUno ? '✓ UNO' : 'UNO!';
 
-  // Render Top Discard Card
+  // Render Realistic Stacked Discard Pile (last 7 thrown cards with random angles)
   const discardZone = document.getElementById('discard-pile');
-  discardZone.innerHTML = '';
-  if (state.topCard) {
-    const topEl = createCardElement(state.topCard, false);
-    topEl.classList.add('discard-card-item');
-    const angle = state.topCard.angle || 0;
-    const ox = state.topCard.offsetX || 0;
-    const oy = state.topCard.offsetY || 0;
-    topEl.style.transform = `translate(${ox}px, ${oy}px) rotate(${angle}deg)`;
-    discardZone.appendChild(topEl);
+  const pile = (state.discardPile && state.discardPile.length > 0)
+    ? state.discardPile
+    : (state.topCard ? [state.topCard] : []);
+  const newestCard = pile[pile.length - 1] || null;
+  const isNewThrow = Boolean(newestCard && newestCard.id !== lastRenderedTopCardId);
+  if (newestCard) {
+    lastRenderedTopCardId = newestCard.id;
   }
+
+  discardZone.innerHTML = '';
+  pile.forEach((card, index) => {
+    const isTop = index === pile.length - 1;
+    const cardEl = createCardElement(card, false);
+    cardEl.classList.remove('not-playable');
+    cardEl.classList.add('discard-card-item');
+    if (isTop && isNewThrow) {
+      cardEl.classList.add('card-just-thrown');
+    } else if (!isTop) {
+      cardEl.classList.add('discard-under-card');
+    }
+    const angle = typeof card.angle === 'number' ? card.angle : 0;
+    const ox = typeof card.offsetX === 'number' ? card.offsetX : 0;
+    const oy = typeof card.offsetY === 'number' ? card.offsetY : 0;
+    cardEl.style.setProperty('--tx', `${ox}px`);
+    cardEl.style.setProperty('--ty', `${oy}px`);
+    cardEl.style.setProperty('--rot', `${angle}deg`);
+    cardEl.style.transform = `translate(${ox}px, ${oy}px) rotate(${angle}deg)`;
+    cardEl.style.zIndex = index + 1;
+    discardZone.appendChild(cardEl);
+  });
 
   // Render Player POV Fan Hand
   const handContainer = document.getElementById('my-hand');

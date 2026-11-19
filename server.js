@@ -180,6 +180,7 @@ function broadcastRoomState(roomId) {
         mySaidUno: p.saidUno,
         miniAppUrl: MINI_APP_URL,
         topCard,
+        discardPile: room.discardPile.slice(-7),
         currentColor: room.currentColor,
         currentValue: room.currentValue,
         turnPlayerId: room.players[room.turnIndex]?.id || null,
@@ -280,9 +281,9 @@ function playCardInternal(room, player, cardId, chosenColor) {
 
   const playedCard = {
     ...card,
-    angle: Math.floor(Math.random() * 34) - 17,
-    offsetX: Math.floor(Math.random() * 16) - 8,
-    offsetY: Math.floor(Math.random() * 16) - 8
+    angle: Math.floor(Math.random() * 56) - 28,
+    offsetX: Math.floor(Math.random() * 24) - 12,
+    offsetY: Math.floor(Math.random() * 20) - 10
   };
   room.discardPile.push(playedCard);
 
@@ -484,9 +485,9 @@ io.on('connection', (socket) => {
       firstCard = drawFromDeck(room, 1)[0];
     }
 
-    firstCard.angle = 0;
-    firstCard.offsetX = 0;
-    firstCard.offsetY = 0;
+    firstCard.angle = Math.floor(Math.random() * 24) - 12;
+    firstCard.offsetX = Math.floor(Math.random() * 10) - 5;
+    firstCard.offsetY = Math.floor(Math.random() * 10) - 5;
     room.discardPile.push(firstCard);
     room.currentColor = firstCard.color;
     room.currentValue = firstCard.value;
