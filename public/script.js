@@ -139,7 +139,7 @@ function setLanguage(lang) {
 // USER & ROOM INITIALIZATION
 // ==========================================
 const urlParams = new URLSearchParams(window.location.search);
-let roomId = urlParams.get('room') || tg?.initDataUnsafe?.start_param || ('uno_' + Math.random().toString(36).substring(2, 7));
+let roomId = urlParams.get('room') || tg?.initDataUnsafe?.start_param || ('uno_' + Math.floor(1000 + Math.random() * 9000));
 
 const tgUser = tg?.initDataUnsafe?.user;
 const currentUser = {
@@ -169,13 +169,15 @@ function changeRoom() {
 
 function newRandomRoom() {
   haptic('light');
-  roomId = 'uno_' + Math.random().toString(36).substring(2, 7);
+  roomId = 'uno_' + Math.floor(1000 + Math.random() * 9000);
   document.getElementById('room-input').value = roomId;
   joinCurrentRoom();
 }
 
 function shareToTelegramGroup() {
-  const shareUrl = `${window.location.origin}?room=${encodeURIComponent(roomId)}`;
+  const shareUrl = latestState?.miniAppUrl
+    ? `${latestState.miniAppUrl}?startapp=${encodeURIComponent(roomId)}`
+    : `${window.location.origin}?room=${encodeURIComponent(roomId)}`;
   const text = currentLang === 'uz'
     ? `🎴 3D UNO o'yiniga qo'shiling! Xona: #${roomId}`
     : `🎴 Заходите за 3D-стол UNO! Комната: #${roomId}`;

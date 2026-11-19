@@ -21,7 +21,7 @@ app.get('/health', (req, res) => res.status(200).json({ status: 'ok', activeRoom
 // Optional Telegram Bot Polling / Webhook support (if BOT_TOKEN is set in Environment Variables)
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
 const APP_URL = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || 'https://telegram-games-uno.onrender.com';
-const MINI_APP_URL = process.env.MINI_APP_URL || '';
+const MINI_APP_URL = (process.env.MINI_APP_URL || '').replace(/\/+$/, '');
 
 if (BOT_TOKEN) {
   let offset = 0;
@@ -35,7 +35,7 @@ if (BOT_TOKEN) {
           const msg = update.message;
           if (msg && msg.text && (msg.text.startsWith('/startgame') || msg.text.startsWith('/uno') || msg.text.startsWith('/start'))) {
             const chatId = msg.chat.id;
-            const roomCode = `uno_${Math.random().toString(36).substring(2, 7)}`;
+            const roomCode = `uno_${Math.floor(1000 + Math.random() * 9000)}`;
             const playUrl = MINI_APP_URL ? `${MINI_APP_URL}?startapp=${roomCode}` : `${APP_URL}?room=${roomCode}`;
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
               method: 'POST',
@@ -178,6 +178,7 @@ function broadcastRoomState(roomId) {
         myHand: p.hand,
         myId: p.id,
         mySaidUno: p.saidUno,
+        miniAppUrl: MINI_APP_URL,
         topCard,
         currentColor: room.currentColor,
         currentValue: room.currentValue,
@@ -230,7 +231,7 @@ function executeBotTurn(roomId) {
       chosenColor = Object.keys(colorCounts).sort((a, b) => colorCounts[b] - colorCounts[a])[0] || 'red';
     }
 
-    if (bot.hand.length === 2) {
+    if (bot.hand.length === 2 && Math.random() < 0.75) {
       bot.saidUno = true;
       io.to(roomId).emit('uno_shout', { playerId: bot.id, playerName: bot.name });
     }
@@ -270,7 +271,7 @@ function playCardInternal(room, player, cardId, chosenColor) {
   if (player.hand.length === 1) {
     if (!player.saidUno) {
       player.unoVulnerable = true;
-      player.unoGraceUntil = Date.now() + 2500; // 2.5s fair grace period
+      player.unoGraceUntil = Date.now() + 1500; // 1.5s grace period before catch opens
     }
   } else {
     player.saidUno = false;
@@ -364,7 +365,15 @@ io.on('connection', (socket) => {
   let currentUserId = null;
 
   socket.on('join_room', ({ roomId, user }) => {
-    const cleanRoomId = (roomId || 'global_uno').trim();
+    const cleanRoomId = (roomId || `uno_${Math.floor(1000 + Math.random() * 9000)}`).trim();
+    if (currentRoomId && currentRoomId !== cleanRoomId) {
+      socket.leave(currentRoomId);
+      const prevRoom = rooms[currentRoomId];
+      if (prevRoom && !prevRoom.started) {
+        prevRoom.players = prevRoom.players.filter(p => p.socketId !== socket.id);
+        broadcastRoomState(currentRoomId);
+      }
+    }
     currentRoomId = cleanRoomId;
     currentUserId = String(user.id);
 
